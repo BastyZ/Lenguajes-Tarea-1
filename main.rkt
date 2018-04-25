@@ -51,9 +51,9 @@
 ;;   Given an expresion (signature), returns type grammar
 (define (parse-type s-expr)
   (match s-expr
-    [(? symbol?) (TNum)]
+    ['Num (TNum)]
     [(list l -> r) (TFun (parse-type l) (parse-type r))]
-    [_ 'else error "Parse error"] ))
+    [_ 'else "Parse error"] ))
 
 ;; pparse :: <s-expr> -> 
 (define (parse s-expr) (void))
