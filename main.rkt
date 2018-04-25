@@ -53,22 +53,26 @@
   (match s-expr
     ['Num (TNum)]
     [(list arg -> ret) (TFun (parse-type arg) (parse-type ret))]
-    [_ 'else "Parse error"] ))
+    [_ 'else (error "Parse error")] ))
 
 ;; parse :: <s-expr> -> <Expr>
 ;;   Given an sub-expresion, returns correspondent expresion
 ;;   Includes 'fun optional form
 ;;   Does not include P3 expresions
-(define (parse s-expr) (match s-expr
+(define (parse s-expr)
+  (match s-expr
     [(? number?) (num s-expr)]
     [(? symbol?) (id s-expr)]
     [(list '+ l r) (add (parse l) (parse r))]
     [(list 'fun (list id ': targ) ': tbody body) (fun id (parse-type targ) (parse body) (parse-type tbody))]
     [(list 'fun (list id ': targ) body) (fun id (parse-type targ) (parse body) #f)]
-    [(list 'with (list id ': targ n) body) (app (fun id (parse-type targ) (parse body) #f) (parse n))]
-    [(list fun-id arg-expr) (app fun-id arg-expr)] ))
+    [(list 'with (list id ': targ n) body) (app (fun id (parse-type targ) (parse body) #f) (parse n))] ))
 
-(define (prettify type) (void))
+;; prettify :: <type> ->  <list>
+(define (prettify type)
+  (match type
+    [(TNum) 'Num]
+    [(TFun l r) (list (prettify l) '-> (prettify r))] ))
 
 
 ;; PROBLEM 2
