@@ -69,6 +69,7 @@
     [(list 'with (list id ': targ n) body) (app (fun id (parse-type targ) (parse body) #f) (parse n))] ))
 
 ;; prettify :: <type> ->  <list>
+;;   Prints a type expresion on a legible way
 (define (prettify type)
   (match type
     [(TNum) 'Num]
