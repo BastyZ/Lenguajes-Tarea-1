@@ -47,8 +47,15 @@
 
 ;; PROBLEM 1
 
-(define (parse-type s-expr) (void))
+;; parse-type :: <s-expr> -> <Type>
+;;   Given an expresion (signature), returns type grammar
+(define (parse-type s-expr)
+  (match s-expr
+    [(? symbol?) (TNum)]
+    [(list l -> r) (TFun (parse-type l) (parse-type r))]
+    [_ 'else error "Parse error"] ))
 
+;; pparse :: <s-expr> -> 
 (define (parse s-expr) (void))
 
 (define (prettify type) (void))
