@@ -12,4 +12,8 @@
 (test (parse-type 'Num) (TNum) )
 (test (parse-type '(Num)) "Parse error")
 
-
+;; P 1.2
+(test (parse '{fun {x : Num} : Num {+ x 1}}) (fun 'x (TNum) (add (id 'x) (num 1)) (TNum)) )
+(test (parse '{with {y : Num 2} {+ x y}}) (app (fun 'y (TNum) (add (id 'x) (id 'y)) #f) (num 2)) )
+(test (parse 2) (num 2) )
+(test (parse '{fun {x : Num} {+ x 1}}) (fun 'x (TNum) (add (id 'x) (num 1)) #f) )

@@ -47,16 +47,26 @@
 
 ;; PROBLEM 1
 
-;; parse-type :: <s-expr> -> <Type>
-;;   Given an expresion (signature), returns type grammar
+;; parse-type :: <type> -> <type>
+;;   Given a type expresion (signature form), returns type grammar
 (define (parse-type s-expr)
   (match s-expr
     ['Num (TNum)]
-    [(list l -> r) (TFun (parse-type l) (parse-type r))]
+    [(list arg -> ret) (TFun (parse-type arg) (parse-type ret))]
     [_ 'else "Parse error"] ))
 
-;; pparse :: <s-expr> -> 
-(define (parse s-expr) (void))
+;; parse :: <s-expr> -> <Expr>
+;;   Given an sub-expresion, returns correspondent expresion
+;;   Includes 'fun optional form
+;;   Does not include P3 expresions
+(define (parse s-expr) (match s-expr
+    [(? number?) (num s-expr)]
+    [(? symbol?) (id s-expr)]
+    [(list '+ l r) (add (parse l) (parse r))]
+    [(list 'fun (list id ': targ) ': tbody body) (fun id (parse-type targ) (parse body) (parse-type tbody))]
+    [(list 'fun (list id ': targ) body) (fun id (parse-type targ) (parse body) #f)]
+    [(list 'with (list id ': targ n) body) (app (fun id (parse-type targ) (parse body) #f) (parse n))]
+    [(list fun-id arg-expr) (app fun-id arg-expr)] ))
 
 (define (prettify type) (void))
 
