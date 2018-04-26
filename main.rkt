@@ -80,7 +80,7 @@
 
 (define (typeof expr) ;; Recibe lo que le entrega parse para retornar el tipo
   (match expr
-     ))
+     [(num n) (TNum)]  ))
 
 (define (typecheck s-expr) (void))
 
