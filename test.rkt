@@ -22,3 +22,4 @@
 (test (prettify (TNum)) 'Num)
 (test (prettify (TFun (TNum) (TNum))) '(Num -> Num) )
 (test (prettify (TFun (TNum) (TFun (TNum) (TNum)))) '(Num -> (Num -> Num)) )
+(test (prettify (TFun (TFun (TNum) (TNum)) (TFun (TNum) (TNum)))) '((Num -> Num) -> (Num -> Num)))
