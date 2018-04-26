@@ -78,7 +78,9 @@
 
 ;; PROBLEM 2
 
-(define (typeof expr) (void))
+(define (typeof expr) ;; Recibe lo que le entrega parse para retornar el tipo
+  (match expr
+     ))
 
 (define (typecheck s-expr) (void))
 
@@ -90,3 +92,6 @@
 (define (compile expr) (void))
 
 (define (typed-compile s-expr) (void))
+
+
+

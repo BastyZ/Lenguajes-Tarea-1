@@ -23,3 +23,6 @@
 (test (prettify (TFun (TNum) (TNum))) '(Num -> Num) )
 (test (prettify (TFun (TNum) (TFun (TNum) (TNum)))) '(Num -> (Num -> Num)) )
 (test (prettify (TFun (TFun (TNum) (TNum)) (TFun (TNum) (TNum)))) '((Num -> Num) -> (Num -> Num)))
+
+;; P 2.1
+(test (typeof (parse '{y : Num})) (TNum))
