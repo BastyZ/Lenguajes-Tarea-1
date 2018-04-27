@@ -72,7 +72,7 @@
 (define (prettify type)
   (match type
     [(TNum) 'Num]
-    [(TFun l r) (list (prettify l) '-> (prettify r))] ))
+    [(TFun l r) {list (prettify l) '-> (prettify r)}] ))
 
 
 ;; PROBLEM 2
@@ -111,9 +111,17 @@ representation BNF:
   (define (typeof-env expr env)
     (match expr
       [(num n) (TNum)]
-      [(id  x) (lookup-type-env x (mtTypeEnv))] ;; dummy case
-      [(fun id idtype arg #f) '(TFun "match with #f")]
-      [(fun id idtype arg argtype) '(TFun "match")]
+      [(id  x) (lookup-type-env x env)]
+      [(fun id idtype arg #f)
+       (typeof-env
+        (fun id idtype arg (typeof-env arg (extend-type-env id idtype env)))
+        (extend-type-env (parse id) idtype env))]
+      [(fun id idtype arg argtype)
+       (begin
+         (define new-env (extend-type-env id idtype env))
+         (if (equal? (typeof-env arg new-env) argtype)
+           (TFun (typeof-env (parse id) new-env) argtype)
+           (error "Type error in expression fun position 1: expected" (prettify argtype) 'found (prettify (typeof-env arg new-env)))))]
         ))
   (typeof-env expr (mtTypeEnv))
   )
