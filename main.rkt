@@ -62,12 +62,15 @@
   (match s-expr
     [(? number?) (num s-expr)]
     [(? symbol?) (id s-expr)]
+    ;; (+ a b) :: (TNum) x (TNum) -> (TNum)
     [(list '+ l r) (add (parse l) (parse r))]
     [(list 'fun (list id ': targ) ': tbody body) (fun id (parse-type targ) (parse body) (parse-type tbody))]
     [(list 'fun (list id ': targ) body) (fun id (parse-type targ) (parse body) #f)]
-    [(list 'with (list id ': targ n) body) (app (fun id (parse-type targ) (parse body) #f) (parse n))] ))
+    [(list 'with (list id ': targ n) body) (app (fun id (parse-type targ) (parse body) #f) (parse n))]
+    [(list left-arg right-arg) (app (parse left-arg) (parse right-arg))]
+    ))
 
-;; prettify :: <type> ->  <list>
+;; prettify :: <type> ->  <list>  (sintaxis concreta)
 ;;   Prints a type expresion on a legible way
 (define (prettify type)
   (match type
@@ -77,7 +80,7 @@
 
 ;; PROBLEM 2
 
-;; Auxiliar thing
+;; Class0424 thing :0
 #|-----------------------------
 Environment abstract data type
  
@@ -112,6 +115,12 @@ representation BNF:
     (match expr
       [(num n) (TNum)]
       [(id  x) (lookup-type-env x env)]
+      [(add a b)
+       (if (equal? (TNum) (typeof-env a env))
+           (if (equal? (TNum) (typeof-env b env))
+               (TNum)
+               (error "expected (add (TNum) (TNum)), found (add" (typeof-env a env) (typeof-env b env) ")"))
+           (error "expected (add (TNum) (TNum)), found (add" (typeof-env a env) (typeof-env b env) ")"))]
       [(fun id idtype arg #f)
        (typeof-env
         (fun id idtype arg (typeof-env arg (extend-type-env id idtype env)))
@@ -122,11 +131,16 @@ representation BNF:
          (if (equal? (typeof-env arg new-env) argtype)
            (TFun (typeof-env (parse id) new-env) argtype)
            (error "Type error in expression fun position 1: expected" (prettify argtype) 'found (prettify (typeof-env arg new-env)))))]
+      ;;[(app 
         ))
   (typeof-env expr (mtTypeEnv))
   )
 
-(define (typecheck s-expr) (void))
+;; typecheck :: <type> -> <list>
+;;   Hace exactamente lo mismo que typeof,
+;;   pero lo entrega en sintaxis concreta
+(define (typecheck s-expr)
+  (prettify (typeof s-expr)))
 
 
 ;; PROBLEM 3
