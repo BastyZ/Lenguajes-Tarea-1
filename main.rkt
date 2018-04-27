@@ -114,9 +114,8 @@ representation BNF:
       [(id  x) (lookup-type-env x (mtTypeEnv))] ;; dummy case
       [(fun id idtype arg #f) '(TFun "match with #f")]
       [(fun id idtype arg argtype) '(TFun "match")]
-      )
-    )
-  (typeof-env expr (myTypeEnv))
+        ))
+  (typeof-env expr (mtTypeEnv))
   )
 
 (define (typecheck s-expr) (void))
