@@ -26,3 +26,4 @@
 
 ;; P 2.1
 (test (typeof (parse 5)) (TNum))
+(test/exn (typeof (parse 'x)) "Type error: No type for identifier: x")

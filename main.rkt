@@ -4,7 +4,6 @@
 ;; Uncomment next line to print only failing tests.
 ;; (print-only-errors #t)
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                            LANGUAGE DEFINITION                            ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -78,10 +77,47 @@
 
 ;; PROBLEM 2
 
-(define (typeof expr) ;; Recibe lo que le entrega parse para retornar el tipo
-  (match expr
-    [(num n) (TNum)]
-    [(fun id idtype arg argtype) '(TFun "match")] ))
+;; Auxiliar thing
+#|-----------------------------
+Environment abstract data type
+ 
+empty-env  :: Env
+extend-env :: Sym type Env -> Env
+lookup-env :: Sym Env -> type
+ 
+representation BNF:
+<env> ::= (mtEnv)
+        | (aEnv <id> <type> <env>)
+|#
+(deftype TypeEnv
+  (mtTypeEnv)
+  (aTypeEnv id type env))
+ 
+(def empty-type-env  (mtTypeEnv))
+ 
+(def extend-type-env aTypeEnv)
+
+(define (lookup-type-env x env)
+  (match env
+    [(mtTypeEnv) (error "Type error: No type for identifier:" x)]
+    [(aTypeEnv id type rest)
+     (if (symbol=? id x)
+         type
+         (lookup-type-env x rest))]))
+
+;; typeof :: <Expr> -> <type>
+;;   Recibe lo que le entrega parse para retornar el tipo
+(define (typeof expr)
+  (define (typeof-env expr env)
+    (match expr
+      [(num n) (TNum)]
+      [(id  x) (lookup-type-env x (mtTypeEnv))] ;; dummy case
+      [(fun id idtype arg #f) '(TFun "match with #f")]
+      [(fun id idtype arg argtype) '(TFun "match")]
+      )
+    )
+  (typeof-env expr (myTypeEnv))
+  )
 
 (define (typecheck s-expr) (void))
 
