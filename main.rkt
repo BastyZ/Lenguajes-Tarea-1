@@ -2,7 +2,7 @@
 (require "machine.rkt")
 
 ;; Uncomment next line to print only failing tests.
-;; (print-only-errors #t)
+(print-only-errors #t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                            LANGUAGE DEFINITION                            ;;
@@ -133,7 +133,9 @@ representation BNF:
            (error "Type error in expression fun position 1: expected" (prettify argtype) 'found (prettify (typeof-env arg new-env)))))]
       [(app (fun id idtype arg argtype) fun-arg)
        (if (equal? idtype (typeof-env fun-arg (extend-type-env id idtype env)))
-           (typeof-env (fun id idtype arg argtype) (extend-type-env id idtype env))
+           (if (equal? (typeof-env arg (extend-type-env id idtype env)) argtype)
+               (typeof-env (fun id idtype arg argtype) (extend-type-env id idtype env))
+               (error "Type error in expression fun position 1: expected" (prettify argtype) 'found (prettify (typeof-env arg (extend-type-env id idtype env)))))
            (error "Type error in expression app position 2: expected" (prettify idtype) 'found (prettify (typeof-env fun-arg (extend-type-env id idtype env)))))]
       ))
   (typeof-env expr (mtTypeEnv))

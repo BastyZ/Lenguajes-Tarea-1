@@ -38,4 +38,5 @@
 (test (typecheck (parse '{fun {x : Num} : Num 5})) '(Num -> Num))
 (test (typecheck (parse 20)) 'Num)
 (test (typecheck (parse '{fun {x : Num} : Num {+ x x}})) '(Num -> Num))
+(test/exn (typeof (parse '{{fun {x : Num} : {Num -> Num} 10} 5})) "Type error in expression fun position 1: expected (Num -> Num) found Num")
 
