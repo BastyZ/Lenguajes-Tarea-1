@@ -62,7 +62,6 @@
   (match s-expr
     [(? number?) (num s-expr)]
     [(? symbol?) (id s-expr)]
-    ;; (+ a b) :: (TNum) x (TNum) -> (TNum)
     [(list '+ l r) (add (parse l) (parse r))]
     [(list 'fun (list id ': targ) ': tbody body) (fun id (parse-type targ) (parse body) (parse-type tbody))]
     [(list 'fun (list id ': targ) body) (fun id (parse-type targ) (parse body) #f)]
@@ -115,9 +114,10 @@ representation BNF:
     (match expr
       [(num n) (TNum)]
       [(id  x) (lookup-type-env x env)]
+      ;; (+ a b) :: (TNum) x (TNum) -> (TNum)
       [(add a b)
-       (if (equal? (TNum) (typeof-env a env))
-           (if (equal? (TNum) (typeof-env b env))
+       (if (TNum? (typeof-env a env))
+           (if (TNum? (typeof-env b env))
                (TNum)
                (error "expected (add (TNum) (TNum)), found (add" (typeof-env a env) (typeof-env b env) ")"))
            (error "expected (add (TNum) (TNum)), found (add" (typeof-env a env) (typeof-env b env) ")"))]
@@ -131,8 +131,11 @@ representation BNF:
          (if (equal? (typeof-env arg new-env) argtype)
            (TFun (typeof-env (parse id) new-env) argtype)
            (error "Type error in expression fun position 1: expected" (prettify argtype) 'found (prettify (typeof-env arg new-env)))))]
-      ;;[(app 
-        ))
+      [(app (fun id idtype arg argtype) fun-arg)
+       (if (equal? idtype (typeof-env fun-arg (extend-type-env id idtype env)))
+           (typeof-env (fun id idtype arg argtype) (extend-type-env id idtype env))
+           (error "Type error in expression app position 2: expected" (prettify idtype) 'found (prettify (typeof-env fun-arg (extend-type-env id idtype env)))))]
+      ))
   (typeof-env expr (mtTypeEnv))
   )
 

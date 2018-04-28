@@ -31,3 +31,11 @@
 (test (typeof (parse '{fun {x : Num} x})) (TFun (TNum) (TNum)))
 (test/exn (typeof (parse '{fun {x : Num} : {Num -> Num} 10})) "Type error in expression fun position 1: expected (Num -> Num) found Num")
 (test/exn (typeof (parse 'y)) "Type error: No type for identifier: y")
+(test/exn (typeof (parse '{{fun {x : Num} : Num {+ x x}} {fun {x : Num} : Num 5}})) "Type error in expression app position 2: expected Num found (Num -> Num)" )
+
+;; P 2.2
+(test/exn (typecheck (parse '{+ x 5})) "Type error: No type for identifier: x")
+(test (typecheck (parse '{fun {x : Num} : Num 5})) '(Num -> Num))
+(test (typecheck (parse 20)) 'Num)
+(test (typecheck (parse '{fun {x : Num} : Num {+ x x}})) '(Num -> Num))
+
