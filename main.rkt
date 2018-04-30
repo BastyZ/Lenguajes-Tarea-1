@@ -201,8 +201,16 @@ representation BNF:
       ))
   (brujin-env expr (mtBrujinEnv)))
 
-;; pasar cosas a notación polaca inversa
-(define (compile expr) (void))
+;; compile :: <Expr> -> List[V]
+;;   Dada una expresion, retorna una lista de instrucciones para la maquina SECD
+(define (compile expr)
+  (match expr
+    [(num n) (list INT-CONST n)]
+    [(acc n) (list ACCESS n)]
+    [(add l r) (append (list (compile r)) (list (compile l)) (ADD))]
+    [(fun-db body) (CLOSURE (list (compile body) (RETURN)))]
+    [(app l r) (list (compile r) (compile l) (APPLY))]
+    ))
 
 (define (typed-compile s-expr) (void))
 

@@ -57,3 +57,5 @@
                      {+ x 10}} {+ 2 3}}))
       (app (fun-db (add (acc 0) (num 10))) (add (num 2) (num 3))))
 
+;; P 3.2
+
