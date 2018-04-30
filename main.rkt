@@ -73,6 +73,7 @@
 ;;   Prints a type expresion on a legible way
 (define (prettify type)
   (match type
+    [#f #f]
     [(TNum) 'Num]
     [(TFun l r) {list (prettify l) '-> (prettify r)}] ))
 
@@ -115,12 +116,10 @@ representation BNF:
       [(num n) (TNum)]
       [(id  x) (lookup-type-env x env)]
       ;; (+ a b) :: (TNum) x (TNum) -> (TNum)
-      [(add a b)
-       (if (TNum? (typeof-env a env))
-           (if (TNum? (typeof-env b env))
-               (TNum)
-               (error "expected (add (TNum) (TNum)), found (add" (typeof-env a env) (typeof-env b env) ")"))
-           (error "expected (add (TNum) (TNum)), found (add" (typeof-env a env) (typeof-env b env) ")"))]
+      [(add (TNum) (TNum)) (TNum)]
+      [(add a b) (if (and (equal? (typeof-env a env) (TNum)) (equal? (typeof-env b env) (TNum)))
+                     (TNum)
+                     (add (typeof-env a env) (typeof-env b env)))]
       [(fun id idtype arg #f)
        (typeof-env
         (fun id idtype arg (typeof-env arg (extend-type-env id idtype env)))
@@ -131,6 +130,10 @@ representation BNF:
          (if (equal? (typeof-env arg new-env) argtype)
            (TFun (typeof-env (parse id) new-env) argtype)
            (error "Type error in expression fun position 1: expected" (prettify argtype) 'found (prettify (typeof-env arg new-env)))))]
+      [(app (fun id idtype arg #f) fun-arg)
+       (if (equal? idtype (typeof-env fun-arg (extend-type-env id idtype env)))
+           (typeof-env (fun id idtype arg (typeof-env arg (extend-type-env id idtype env))) (extend-type-env id idtype env))
+           (error "Type error in expression app position 2: expected" (prettify idtype) 'found (prettify (typeof-env fun-arg (extend-type-env id idtype env)))))]
       [(app (fun id idtype arg argtype) fun-arg)
        (if (equal? idtype (typeof-env fun-arg (extend-type-env id idtype env)))
            (if (equal? (typeof-env arg (extend-type-env id idtype env)) argtype)
@@ -145,15 +148,58 @@ representation BNF:
 ;;   Hace exactamente lo mismo que typeof,
 ;;   pero lo entrega en sintaxis concreta
 (define (typecheck s-expr)
-  (prettify (typeof s-expr)))
+  (prettify (typeof (parse s-expr))))
 
 
 ;; PROBLEM 3
 
-;; crear una wea como los ambientes (con valores), pero que al agregar
-;; aumente el valor de los indices anteriores en 1, y setee el
-;; nuevo indice en cero (el más cercano en definición)
-(define (deBruijn expr) (void))
+;; Class0424 thing :0
+#|-----------------------------
+Environment abstract data type (brujin)
+ 
+empty-env  :: Env
+extend-env :: num id Env -> Env
+lookup-env :: num Env -> type
+ 
+representation BNF:
+<env> ::= (mtEnv)
+        | (aEnv <num> <id> <env>)
+|#
+(deftype BrujinEnv
+  (mtBrujinEnv)
+  (aBrujinEnv index val env))
+ 
+(def empty-brujin-env  (mtBrujinEnv))
+ 
+(define (extend-b-env value env)
+  (define (suma env)
+    (match env
+      [(mtBrujinEnv) (mtBrujinEnv)]
+      [(aBrujinEnv index val rest) (aBrujinEnv (add1 index) val (suma rest))]
+      ))
+  (aBrujinEnv 0 value (suma env)))
+
+(define (lookup-brujin-env x env)
+  (match env
+    [(mtBrujinEnv) (error "Free identifier:" x)]
+    [(aBrujinEnv index val rest)
+     (if (symbol=? val x)
+         index
+         (lookup-brujin-env x rest))]))
+
+;; deBrujin :: <Expr> -> <Expr>
+;;   Given an expresion, replaces every id for a index of access
+;;   and returns the modifies expresion
+(define (deBruijn expr)
+  (define (brujin-env expr env)
+    (match expr
+      [(num n) (num n)]
+      [(id x) (acc (lookup-brujin-env x env))]
+      [(add l r) (add (brujin-env l env) (brujin-env r env))]
+      [(fun id targ body tbody) (fun-db (brujin-env body (extend-b-env id env)))] ;; TODO avanzar
+      [(app l r) (app (brujin-env l env) (brujin-env r env))]
+      ))
+  (brujin-env expr (mtBrujinEnv)))
 
 ;; pasar cosas a notación polaca inversa
 (define (compile expr) (void))

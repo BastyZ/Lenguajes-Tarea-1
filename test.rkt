@@ -34,9 +34,26 @@
 (test/exn (typeof (parse '{{fun {x : Num} : Num {+ x x}} {fun {x : Num} : Num 5}})) "Type error in expression app position 2: expected Num found (Num -> Num)" )
 
 ;; P 2.2
-(test/exn (typecheck (parse '{+ x 5})) "Type error: No type for identifier: x")
-(test (typecheck (parse '{fun {x : Num} : Num 5})) '(Num -> Num))
-(test (typecheck (parse 20)) 'Num)
-(test (typecheck (parse '{fun {x : Num} : Num {+ x x}})) '(Num -> Num))
+(test/exn (typecheck '{+ x 5}) "Type error: No type for identifier: x")
+(test (typecheck '{fun {x : Num} : Num 5}) '(Num -> Num))
+(test (typecheck 20) 'Num)
+(test (typecheck '{fun {x : Num} : Num {+ x x}}) '(Num -> Num))
 (test/exn (typeof (parse '{{fun {x : Num} : {Num -> Num} 10} 5})) "Type error in expression fun position 1: expected (Num -> Num) found Num")
+
+;; P 3.1
+(test (extend-b-env 200 (extend-b-env 100 (mtBrujinEnv))) (aBrujinEnv 0 200 (aBrujinEnv 1 100 (mtBrujinEnv))))
+(test/exn (deBruijn (add (num 1) (id 'x))) "Free identifier: x")
+(test (deBruijn (fun 'x (TNum) (add (num 10) (num 1)) (TNum))) (fun-db (add (num 10) (num 1))))
+(test (deBruijn (parse '{+ 1 {with {x : Num 1}
+                           {with {y : Num 2}
+                                 {+ x y}}}})) (add
+                                               (num 1)
+                                               (app
+                                                (fun-db
+                                                 (app (fun-db (add (acc 1) (acc 0))) (num 2)))
+                                                (num 1))))
+(test (deBruijn
+       (parse '{{fun {x : Num} : Num
+                     {+ x 10}} {+ 2 3}}))
+      (app (fun-db (add (acc 0) (num 10))) (add (num 2) (num 3))))
 
