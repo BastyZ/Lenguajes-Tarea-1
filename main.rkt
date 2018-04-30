@@ -150,8 +150,12 @@ representation BNF:
 
 ;; PROBLEM 3
 
+;; crear una wea como los ambientes (con valores), pero que al agregar
+;; aumente el valor de los indices anteriores en 1, y setee el
+;; nuevo indice en cero (el más cercano en definición)
 (define (deBruijn expr) (void))
 
+;; pasar cosas a notación polaca inversa
 (define (compile expr) (void))
 
 (define (typed-compile s-expr) (void))
