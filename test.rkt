@@ -59,3 +59,35 @@
 
 ;; P 3.2
 
+(test (compile (deBruijn (parse '{{fun {x : Num} : Num
+                                   {+ x 10}} {+ 2 3}})))
+(list
+ (INT-CONST 3)
+ (INT-CONST 2)
+ (ADD)
+ (CLOSURE (list (INT-CONST 10) (ACCESS 0) (ADD) (RETURN)))
+ (APPLY)) )
+(test/exn (compile (deBruijn (add (num 1) (id 'x)))) "Free identifier: x")
+(test (compile (deBruijn (parse '{{fun {x : Num} : Num
+                                   x} {+ 2 3}})))
+(list (INT-CONST 3) (INT-CONST 2) (ADD) (CLOSURE (list (ACCESS 0) (RETURN))) (APPLY)))
+(test/exn (compile (deBruijn (parse '{with {y : Num 2}
+             {+ x y}}))) "identifier: x")
+
+;; P 3.3
+(test/exn (typed-compile '{with {y : Num 2}
+             {+ x y}}) "identifier: x")
+(test (typed-compile '{{fun {x : Num} : Num
+                                   x} {+ 2 3}})
+      (list (INT-CONST 3) (INT-CONST 2) (ADD) (CLOSURE (list (ACCESS 0) (RETURN))) (APPLY)))
+(test/exn (typed-compile '(+ 1 x)) "identifier: x")
+(test (typed-compile '{{fun {x : Num} : Num
+                                   {+ x 10}} {+ 2 3}})
+(list
+ (INT-CONST 3)
+ (INT-CONST 2)
+ (ADD)
+ (CLOSURE (list (INT-CONST 10) (ACCESS 0) (ADD) (RETURN)))
+ (APPLY)) )
+
+

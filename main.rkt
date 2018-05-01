@@ -204,15 +204,23 @@ representation BNF:
 ;; compile :: <Expr> -> List[V]
 ;;   Dada una expresion, retorna una lista de instrucciones para la maquina SECD
 (define (compile expr)
-  (match expr
-    [(num n) (list INT-CONST n)]
-    [(acc n) (list ACCESS n)]
-    [(add l r) (append (list (compile r)) (list (compile l)) (ADD))]
-    [(fun-db body) (CLOSURE (list (compile body) (RETURN)))]
-    [(app l r) (list (compile r) (compile l) (APPLY))]
-    ))
+  (define (compile-list expr lista)
+    (match expr
+      [(num n) (cons (INT-CONST n) lista)]
+      [(acc n) (cons (ACCESS n) lista)]
+      [(add l r) (compile-list r (compile-list l (cons (ADD) lista)))]
+      [(fun-db body) (cons (CLOSURE (compile-list body (cons (RETURN) '()))) lista)]
+      [(app l r) (compile-list r (compile-list l (cons (APPLY) lista)))]
+      ))
+    (compile-list expr '()))
 
-(define (typed-compile s-expr) (void))
+;; typed-compile :: <s-expr> -> List[V]
+;;   Genera el códico de maquina, verificando tipos, a partir de una expresion
+(define (typed-compile s-expr)
+  (begin
+    (typecheck s-expr)
+    (compile (deBruijn (parse s-expr)))
+    ))
 
 
 
